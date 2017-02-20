@@ -1,6 +1,12 @@
 * yavw
 - Yet another vulnerable webserver (to teach XSS/SQLi/command injection).
 - Nils Ole Tippenhauer, SUTD, 2017
+- Written using Python3, flask, and sqlite3 library
+- Relatively small code base should allow students to understand what is going on, and possibly fix vulnerabilities
+- Most vulnerabilities had to be manually enabled, as flask prevents them by default.
+- Not much error handling, running in debug mode to allow students to see where things break
+- Disclaimer: you should never make this server accessible to anyone except localhost. Even then, be aware it allows arbitrary command injection.
+- The following are example questions I give my students in our exercise
 
 * Part 1: SQL Injection
 - We distribute a =yavw.py= server script, run it with python3 locally to test out your exploits
@@ -35,7 +41,7 @@
       the javascript exploit code into a simple html file, and visit
       it with your browser. Does it still work, without being injected into the page? why not?
 - We had to manually enable XSS attacks in our templates, can you spot where? Can you fix all XSS vulnerabilities you found?
-* Command Injection
+* Part 3: Command Injection
 ** Listing secret file
 - This time, we will not inject any JavaScript.
 - Find a way to execute a shell command on the server by using one of the provided input fields
