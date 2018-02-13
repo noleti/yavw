@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-# Lab 4 server for SUTD 50.020 class - vulnerable to XSS, SQLi, Command injection
+# using (once again) http://blog.luisrei.com/articles/flaskrest.html
+# Lab 4 server for 50.020 - vulnerable to XSS, SQLi, Command injection
 # Nils, SUTD, 2017
 
 from flask import Flask, render_template,request,redirect,make_response,session
 import sqlite3
 import os
 import hashlib
-
+import subprocess
 db = "storage.db"
 
 app = Flask(__name__)
@@ -20,11 +21,6 @@ def main():
     if not 'username' in session:
         return redirect("/login",303)
     ul = None
-    # if user is admin, list all users
-    if session['username']==('admin','admin','admin'):
-        conn = sqlite3.connect('storage.db')
-        c=conn.cursor()
-        ul = c.execute("SELECT * FROM users").fetchall()
     return render_template('main.html', name=session['username'][0], users=ul,news=getNews())
 
 @app.route('/login', methods=['GET','POST'])
@@ -76,24 +72,13 @@ def news():
     conn.commit()
     return render_template('main.html', name=session['username'][0],news=getNews())
 
-@app.route('/name',methods=['POST'])
-def name():
-    if not 'username' in session:
-        return redirect("/login",303)
-    name = request.form['name']
-    conn = sqlite3.connect('storage.db')
-    c=conn.cursor()
-    c.execute("UPDATE users SET name= '%s' WHERE email='%s'"%(name,session['username'][2]))
-    conn.commit()
-    session['username'] = (name,session['username'][1],session['username'][2])
-    return render_template('main.html', name=session['username'][0],error2="Updated username to "+name,news=getNews())
 
 @app.route('/ping', methods=['POST'])
 def ping():
     cmd = 'ping -c 1 '+ request.form['target']
     stream = os.popen(cmd)
     rval = stream.read()
-    return render_template('main.html', error3=rval,news=getNews())
+    return render_template('main.html', name=session['username'][0], error3=rval, news=getNews())
 
 if __name__ == '__main__':
 

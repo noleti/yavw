@@ -18,7 +18,7 @@
 - Log in as Alice again, and check the different options the website gives you. Can you use one of them to conduct a second order XSS attack?
   - Your goal is to inject some code on a page that the admin user will look at
   - Your injected code (HTML or .js) should make the admin disclose his cookie to you
-  - In particular, assume that the admin sees a list of all user data when he logs in: email, name, and password hash
+  - In particular, assume that the admin sees a list of all news when he logs in
 - Find a way to inject a simple XSS string into the database
 - Exploit this to obtain the =session= cookie of the victim! By using that session ID, you could take over an existing session the victim has with the website
   - Update your XSS to trick the admin's browser to do an HTTP GET to a URL of the attacker's choice

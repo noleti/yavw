@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>YAVW Main page</title>
+  <title>50.020 Lab 4 Main page</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -11,7 +11,7 @@
 <body>
 
 <div class="container">
-  <h2>YAVW Main Page</h2>
+  <h2>50.020 Lab 4 Main Page</h2>
   <p>Welcome to the main page, {{name|safe}}! Click here to <a href=/logout>logout</a></p>
   {% if rval %}<p> {{rval}}</p>{% endif %}
 </div>
@@ -20,18 +20,16 @@
   <h3>Simple Search</h3>
   <form action="/search">
     <div class="form-group">
-      <label for="term">Search for term:</label>
       <input type="text" name="term" class="form-control" id="term" placeholder="Enter term">
     </div>
     <button type="submit" class="btn btn-default">Submit</button>
   </form> {{error|safe}}
 </div>
 <div class="container">
-  <h3>Update username</h3>
-  <form action="/name" method="post">
+  <h3>Post News item</h3>
+  <form action="/news" method="get">
     <div class="form-group">
-      <label for="name">Update your username:</label>
-      <input type="text" name="name" class="form-control" id="name" placeholder="Enter new name">
+      <input type="text" name="text" class="form-control" id="text" placeholder="Enter news">
     </div>
     <button type="submit" class="btn btn-default">Submit</button>
   </form> {{error2}}
@@ -40,7 +38,6 @@
   <h3>Ping a host</h3>
   <form action="/ping" method="post">
     <div class="form-group">
-      <label for="name">Update your username:</label>
       <input type="text" name="target" class="form-control" id="target" placeholder="Enter IP to ping">
     </div>
     <button type="submit" class="btn btn-default">Submit</button>
@@ -52,23 +49,10 @@
   <h3>News list</h3>
   <ul>
 {% for item in news -%}
-    <li>{{ item[0] }} says: {{item[1]}}</li>
+    <li>{{ item[0] }} says: {{item[1]|safe}}</li>
 {%- endfor %}
 </ul>
 </div>
 {% endif %}
-
-
-{% if users%}
-<div class="container">
-  <h3>User list</h3>
-  <ul>
-{% for item in users -%}
-    <li>{{ item |safe }}</li>
-{%- endfor %}
-</ul>
-</div>
-{% endif %}
-
 </body>
 </html>
