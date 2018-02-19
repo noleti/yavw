@@ -94,8 +94,8 @@ if __name__ == '__main__':
         pass
     conn = sqlite3.connect(db)
     c=conn.cursor()
-    c.execute("create table NEWS(source string, text string)")
-    c.execute("create table USERS(name string, password string, email string)")
+    c.execute("create table if not exists NEWS(source string, text string)")
+    c.execute("create table if not exists USERS(name string, password string, email string) ")
     c.execute("insert into users (email, name,password) values ('alice@alice.com','alice','"+alicehash+"')")
     conn.commit()
     app.config.update(SESSION_COOKIE_HTTPONLY=False)
