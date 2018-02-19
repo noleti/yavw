@@ -76,8 +76,8 @@ def news():
 @app.route('/ping', methods=['POST'])
 def ping():
     cmd = 'ping -c 1 '+ request.form['target']
-    stream = os.popen(cmd)
-    rval = stream.read()
+    stream = subprocess.Popen(cmd,shell= True, executable='/bin/bash', stdout=subprocess.PIPE)    
+    rval = stream.stdout.read()
     return render_template('main.html', name=session['username'][0], error3=rval, news=getNews())
 
 if __name__ == '__main__':
