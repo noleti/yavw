@@ -14,8 +14,8 @@
 - Based on the example attacks from the class, find a way to log in as Alice!
 * Part 2: Cross-Site Scripting
 - Note: restarting the webserver will refresh the SQL database
-** Second order (persistent) attack
-- Log in as Alice again, and check the different options the website gives you. Can you use one of them to conduct a second order XSS attack?
+** Persistent attack
+- Log in as Alice again, and check the different options the website gives you. Can you use one of them to conduct a persistent XSS attack?
   - Your goal is to inject some code on a page that the admin user will look at
   - Your injected code (HTML or .js) should make the admin disclose his cookie to you
   - In particular, assume that the admin sees a list of all news when he logs in
@@ -27,7 +27,7 @@
 - After injecting your XSS string, login as admin user to test that the injection works. Use the second password from the =secrets= file
   - Logout after displaying the main site, login as alice again (using the password, or the SQL injection)
   - You should now be able to see the news item!
-** First order attack
+** Non-persistent attack
 - Look for a way to temporarily inject code via a specifically crafted URL
 - Exploit this to obtain the session of the victim (again)
   - Lets assume the admin is logged into the site when clicking on the link
@@ -36,7 +36,7 @@
     to issue a HTTP GET to http://localhost:5000/news?text=<adminsession>
   - Craft the URL, login as admin user, then visit the XSS URL you designed
   - Admin's session should again be leaked as news item
-  - Note: it might seem a bit redundant to do a first order XSS
+  - Note: it might seem a bit redundant to do a non-persistent XSS
       attack to make the attacker visit the =news= URL. Try putting
       the javascript exploit code into a simple html file, and visit
       it with your browser. Does it still work, without being injected into the page? why not?
