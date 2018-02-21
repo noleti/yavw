@@ -3,7 +3,7 @@
 # Lab 4 server for 50.020 - vulnerable to XSS, SQLi, Command injection
 # Nils, SUTD, 2017
 
-from flask import Flask, render_template,request,redirect,make_response,session
+from flask import Flask, render_template, request, redirect, make_response, session
 import sqlite3
 import os
 import hashlib
@@ -12,91 +12,112 @@ db = "storage.db"
 
 app = Flask(__name__)
 
+# Convince browsers like Chrome to allow easy non-persistent XSS
+
+
+@app.after_request
+def no_XSS_Protection(response):
+    response.headers["X-XSS-Protection"] = '0'
+    return response
+
+
 def hash(data):
     """ Wrapper around sha224 """
-    return hashlib.sha224(data.replace('\n','').encode('ascii')).hexdigest()
+    return hashlib.sha224(data.replace('\n', '').encode('ascii')).hexdigest()
+
 
 @app.route('/')
 def main():
     if not 'username' in session:
-        return redirect("/login",303)
+        return redirect("/login", 303)
     ul = None
-    return render_template('main.html', name=session['username'][0], users=ul,news=getNews())
+    return render_template('main.html', name=session['username'][0], users=ul, news=getNews())
 
-@app.route('/login', methods=['GET','POST'])
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
         return render_template('form.html')
     elif request.method == 'POST':
         conn = sqlite3.connect('storage.db')
-        c=conn.cursor()
-        email = request.form['email']        
+        c = conn.cursor()
+        email = request.form['email']
         password = hash(request.form['password'])
-        print("SELECT * FROM users WHERE email='%s' and password='%s'"%(email,password))
-        c.execute("SELECT * FROM users WHERE email='%s' and password='%s'"%(email,password))
-        rval=c.fetchone()
+        print("SELECT * FROM users WHERE email='%s' AND password='%s'" %
+              (email, password))
+        c.execute("SELECT * FROM users WHERE email='%s' AND password='%s'" %
+                  (email, password))
+        rval = c.fetchone()
         if email == 'admin@a.com' and password == app.adminhash:
-            rval=('admin','admin','admin')
+            rval = ('admin', 'admin', 'admin')
         if rval:
-            session['username'] = rval          
-            return redirect("/",303)
+            session['username'] = rval
+            return redirect("/", 303)
         else:
             return render_template('form.html', error='Username or password incorrect!')
+
 
 @app.route('/logout')
 def logout():
     session.pop('username', None)
-    return redirect("/login",303)    
-        
+    return redirect("/login", 303)
+
+
 @app.route('/search')
 def search():
     if not 'username' in session:
-        return redirect("/login",303)
+        return redirect("/login", 303)
     term = request.args.get('term')
-    return render_template('main.html', name=session['username'][0],error="Search not implemented yet. Could not find "+term,news=getNews())
+    return render_template('main.html', name=session['username'][0], error="Search not implemented yet. Could not find " + term, news=getNews())
+
 
 def getNews():
     conn = sqlite3.connect('storage.db')
-    c=conn.cursor()
+    c = conn.cursor()
     return c.execute("SELECT * FROM news").fetchall()
+
 
 @app.route('/news')
 def news():
     if not 'username' in session:
-        return redirect("/login",303)
+        return redirect("/login", 303)
     term = request.args.get('text')
     conn = sqlite3.connect('storage.db')
-    c=conn.cursor()
+    c = conn.cursor()
     print(term)
-    c.execute("insert into news (source,text) values (?,?)",(session['username'][0],term))
+    c.execute("insert into news (source,text) values (?,?)",
+              (session['username'][0], term))
     conn.commit()
-    return render_template('main.html', name=session['username'][0],news=getNews())
+    return render_template('main.html', name=session['username'][0], news=getNews())
 
 
 @app.route('/ping', methods=['POST'])
 def ping():
-    cmd = 'ping -c 1 '+ request.form['target']
-    stream = subprocess.Popen(cmd,shell= True, executable='/bin/bash', stdout=subprocess.PIPE)    
+    cmd = 'ping -c 1 ' + request.form['target']
+    stream = subprocess.Popen(
+        cmd, shell=True, executable='/bin/bash', stdout=subprocess.PIPE)
     rval = stream.stdout.read()
     return render_template('main.html', name=session['username'][0], error3=rval, news=getNews())
 
 if __name__ == '__main__':
 
-    with open('secrets','r') as f:
+    with open('secrets', 'r') as f:
         s = f.readlines()
-    app.secret_key = s[0].replace('\n','')
-    app.adminhash=hash(s[1])
-    alicehash=hash(s[2])
-    
+    app.secret_key = s[0].replace('\n', '')
+    app.adminhash = hash(s[1])
+    alicehash = hash(s[2])
+
     try:
         os.remove(db)
     except OSError:
         pass
     conn = sqlite3.connect(db)
-    c=conn.cursor()
-    c.execute("create table if not exists NEWS(source string, text string)")
-    c.execute("create table if not exists USERS(name string, password string, email string) ")
-    c.execute("insert into users (email, name,password) values ('alice@alice.com','alice','"+alicehash+"')")
+    c = conn.cursor()
+    c.execute("create table if not exists news(source string, text string)")
+    c.execute(
+        "create table if not exists users(name string, password string, email string) ")
+    c.execute(
+        "insert into users (email, name,password) values ('alice@alice.com','alice','" + alicehash + "')")
     conn.commit()
     app.config.update(SESSION_COOKIE_HTTPONLY=False)
     app.run(debug=True)
